@@ -44,12 +44,13 @@ def add_to_pokupka(shop_id, product_id, employee_id, amount, total):
 
 
 def addButtonFunc():
-    CheckText['state'] = NORMAL
-    CheckText.insert("end", str(combo_product.get()))
-    CheckText.insert("end", " ")
-    CheckText.insert("end", (str(amount.get())))
-    CheckText.insert("end", "\n")
-    CheckText['state'] = tk.DISABLED
+    if (combo_product.get() != ""):
+        CheckText['state'] = NORMAL
+        CheckText.insert("end", str(combo_product.get()))
+        CheckText.insert("end", " ")
+        CheckText.insert("end", (str(amount.get())))
+        CheckText.insert("end", "\n")
+        CheckText['state'] = tk.DISABLED
 
 
 
