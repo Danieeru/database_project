@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
-import  tkinter as tk
+import tkinter as tk
 from tkinter import *
 from tkinter import messagebox as mb
 from tkinter import ttk
@@ -13,8 +13,9 @@ connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
 # Создаем курсор для выполнения операций с базой данных
 cursor = connection.cursor()
 ##engine = create_engine('postgresql://{}:{}@localhost/demo'.format(auth['postgres'], auth['1909']), echo=True)
-engine = create_engine ('postgresql://postgres:1909@localhost/try')
+engine = create_engine('postgresql://postgres:1909@localhost/try')
 cursor = engine.connect()
+
 
 ## отправляет запрос на бд и выполняет его
 ## это функция кнопки
@@ -24,19 +25,32 @@ def change():
     runfunc(s)
     print("button pressed")
 
+
 ## функция которая отправляет запрос к БД
 def runfunc(str):
     try:
         cursor.execute(str)
     except:
         mb.showerror('Ошибка запроса', 'Ошибка в запросе к БД!\n Попробуйте изменить запрос.')
-        ##print("error")
+        # print("error")
 
-## функция которая может вызываться внутри кода, но не из gui (пока)
-def add_to_pokupka (shop_id, product_id, employee_id, amount, total):
+
+# функция которая может вызываться внутри кода, но не из gui (пока)
+def add_to_pokupka(shop_id, product_id, employee_id, amount, total):
     qu = "INSERT INTO pokupka (shop_id, product_id, employee_id, amount, total)" \
-             " VALUES ('" + str(shop_id) + "', '" + str(product_id) + "', '" + str(employee_id) + "', '" + str(amount) + "', '" + str(total) +"');"
+         " VALUES ('" + str(shop_id) + "', '" + str(product_id) + "', '" + str(employee_id) + "', '" + str(
+        amount) + "', '" + str(total) + "');"
     runfunc(qu)
+
+
+def addButtonFunc():
+    CheckText['state'] = NORMAL
+    CheckText.insert("end", str(combo_product.get()))
+    CheckText.insert("end", " ")
+    CheckText.insert("end", (str(amount.get())))
+    CheckText.insert("end", "\n")
+    CheckText['state'] = tk.DISABLED
+
 
 
 window = Tk()
@@ -59,8 +73,29 @@ txtexample.grid(column=0, row=1)
 b1 = Button(tab2, text="отправить запрос", width=15, height=3, command=change)
 b1.grid(column=0, row=0)
 
+label1 = Label(tab1, text="выберете продукт")
+label1.grid(column=0, row=0)
 
+combo_product = Combobox(tab1)
+combo_product['values'] = ("Bud", "Балтика 7", "Балтика 9", "Amstel", "Corona", "Heineken", "Carlsberg",
+                           "Lowenbreau", "Miller", "Толстяк", "Kozel", "Старый мельник", "Клинское", "Жигулевское",
+                           "387", "Spaten", "Asahi", "Paulaner")
+combo_product.grid(column=1, row=0)
 
+label2 = Label(tab1, text="Выберете количество")
+label2.grid(column=2, row=0)
+
+amount = Spinbox(tab1, from_=1, to=100, width=5)
+amount.grid(column=3, row=0)
+
+n = 1.0
+buttonAddToCheck = Button(tab1, text="добавить")
+buttonAddToCheck['command'] = addButtonFunc
+buttonAddToCheck.grid(column=4, row=0)
+
+CheckText = Text(tab1, width=30, height=10, wrap=WORD, state=tk.DISABLED)
+CheckText.grid(column=0, row=1)
+##CheckText.insert(1.0, "hello")
 
 
 query = '''select * from aircrafts_data'''
@@ -75,7 +110,7 @@ create_table_pokupka = '''CREATE TABLE pokupka
 )'''
 
 ##cursor.execute(create_table_pokupka)
-#add_to_pokupka(1, 2, 4, 3, 150)
+# add_to_pokupka(1, 2, 4, 3, 150)
 ##result = cursor.execute(query)
 ##print(list(result))
 appTabs.pack(expand=1, fill='both')
