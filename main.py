@@ -95,11 +95,31 @@ def showemployee():
     return
 
 
-def delbuutonfunc():
+def delEmployeeBuuton():
     name = textname.get(1.0, END)
     name.rstrip()
     # очень важно писать %%
     sq = "delete from employee where name like '%%" + name.rstrip() + "%%'"
+    print(sq)
+    runfunc(sq)
+
+def addProductButton():
+    productname = prodname.get(1.0, END)
+    typename = typecombo.get()
+    manufacturer = manufCombo.get()
+    price = costText.get(1.0, END)
+    discount = discountText.get(1.0, END)
+    print ('name', productname)
+    print('type', typename)
+    print('manuf', manufacturer)
+    print('price', price)
+    print('dics', discount)
+    #ДОПИСАТЬ!
+
+
+def delProductButton():
+    name = prodname.get(1.0, END)
+    sq = "delete from product where name like '%%" + name.rstrip() + "%%'"
     print(sq)
     runfunc(sq)
 
@@ -113,11 +133,12 @@ appTabs = ttk.Notebook(window)
 tab1 = ttk.Frame(appTabs)
 tab2 = ttk.Frame(appTabs)
 tab3 = ttk.Frame(appTabs)
+tab4 = ttk.Frame(appTabs)
 
 appTabs.add(tab1, text="Окно1")
-appTabs.add(tab2, text="Добавление сотрудника")
+appTabs.add(tab2, text="Сотрудники")
 appTabs.add(tab3, text="ввод")
-
+appTabs.add(tab4, text='Товар')
 ##создание тексового поля
 ##Значение WORD опции wrap позволяет переносить слова на новую строку целиком, а не по буквам.
 
@@ -183,33 +204,31 @@ employeebutton.grid(column=4, row=0)
 # image = canvas.create_image(0, 0, anchor='nw',image=photo)
 # canvas.grid(column=3, row=2)
 
-
-# $
-
-
+# добавление таблицы
 tableemp = ttk.Treeview(tab2)
 tableemp['columns'] = ('id', 'market_id', 'name', 'position')
 tableemp.column("#0", width=0, stretch=NO)
-tableemp.column('id', anchor=CENTER, width=80)
-tableemp.column('market_id', anchor=CENTER, width=80)
-tableemp.column('name', anchor=CENTER, width=80)
-tableemp.column('position', anchor=CENTER, width=80)
+tableemp.column('id', anchor=CENTER, width=90)
+tableemp.column('market_id', anchor=CENTER, width=90)
+tableemp.column('name', anchor=CENTER, width=90)
+tableemp.column('position', anchor=CENTER, width=90)
 tableemp.heading('#0', text="", anchor=CENTER)
 tableemp.heading('id', text='ID', anchor=CENTER)
 tableemp.heading('market_id', text='market_id', anchor=CENTER)
 tableemp.heading('name', text='Name', anchor=CENTER)
 tableemp.heading('position', text='Position', anchor=CENTER)
-tableemp.grid(column=3, row=2)
+#tableemp.grid(column=3, row=2)
+tableemp.place(relx=0, rely=0.5)
 
 showbutton = Button(tab2, text="Показать сотрудников")
 showbutton['command'] = showemployee
 showbutton.grid(column=4, row=1)
 
 delbutton = Button(tab2, text="Удалить сотрудника")
-delbutton['command'] = delbuutonfunc
+delbutton['command'] = delEmployeeBuuton
 delbutton.grid(column=4, row=2)
 
-# $
+
 
 # tab3
 txtexample = Text(tab3, width=25, height=5, wrap=WORD)
@@ -219,11 +238,70 @@ txtexample.pack(anchor=NW)
 b1 = Button(tab3, text="отправить запрос", width=15, height=3, command=change)
 # b1.grid(column=0, row=0)
 b1.pack(anchor=NW)
-query = '''select * from aircrafts_data'''
+#query = '''select * from aircrafts_data'''
 
 ##cursor.execute(create_table_pokupka)
 # add_to_pokupka(1, 2, 4, 3, 150)
 ##result = cursor.execute(query)
 ##print(list(result))
+
+#tab4
+
+label_t4_1 = Label(tab4, text="Название товара")
+label_t4_1.grid(column=0, row=0)
+prodname = Text(tab4, width=20, height=1)
+prodname.grid(column=0, row=1)
+
+label_t4_2 = Label(tab4, text="Выберете тип")
+label_t4_2.grid(column=1, row=0)
+typecombo = Combobox(tab4, width=30)
+typecombo['values'] = ('Пиво', 'Вино', 'Виски', 'Коньяк', 'Шампанское', 'Ликер', 'Водка', 'Слабоалкогольный напиток')
+typecombo.grid(column=1, row=1)
+
+label_t4_3 = Label(tab4, text="Выберете производителя")
+label_t4_3.grid(column=2, row=0)
+manufCombo = Combobox(tab4)
+manufCombo['values'] = ('Балтика', 'Efes Russia', 'HEINEKEN Russia', 'Московская пивоваренная компания',
+                        'SUN InBev Russia', 'Löwenbräu AG', 'Paulaner Brauerei GmbH & Co. KG', 'Bayreuther', 'Spaten',
+                        'BrewDog', 'Eichbaum')
+manufCombo.grid(column=2, row=1)
+
+label_t4_4 = Label(tab4, text="Ведите цену")
+label_t4_4.grid(column=3, row=0)
+costText= Text(tab4, width=10, height=1)
+costText.grid(column=3, row=1)
+
+label_t4_5 = Label(tab4, text="Введите скидку")
+label_t4_5.grid(column=4, row=0)
+discountText = Text(tab4, width=10, height=1)
+discountText.grid(column=4, row=1)
+
+buttonAddProduct = Button(tab4, text="Добавить товар")
+buttonAddProduct['command'] = addProductButton
+buttonAddProduct.grid(column=5, row=0)
+
+buttonDelProduct = Button(tab4, text="Удалить товар")
+buttonDelProduct['command'] = delProductButton
+buttonDelProduct.grid(column=5, row=1)
+
+
+prodTable = ttk.Treeview(tab4)
+prodTable['columns'] = ('id', 'type_id', 'manufacturer_id', 'name', 'price', 'discount')
+prodTable.column('#0', width=0, stretch=NO)
+prodTable.column('id', anchor=CENTER, width=90)
+prodTable.column('type_id', anchor=CENTER, width=90)
+prodTable.column('manufacturer_id', anchor=CENTER, width=90)
+prodTable.column('name', anchor=CENTER, width=90)
+prodTable.column('price', anchor=CENTER, width=90)
+prodTable.column('discount', anchor=CENTER, width=90)
+prodTable.heading('#0', text="", anchor=CENTER)
+prodTable.heading('id', text="id", anchor=CENTER)
+prodTable.heading('type_id', text="type_id", anchor=CENTER)
+prodTable.heading('manufacturer_id', text="manufacturer_id", anchor=CENTER)
+prodTable.heading('name', text="name", anchor=CENTER)
+prodTable.heading('price', text="price", anchor=CENTER)
+prodTable.heading('discount', text="discount", anchor=CENTER)
+prodTable.place(relx=0, rely=0.5)
+
 appTabs.pack(expand=1, fill='both')
 window.mainloop()
