@@ -42,7 +42,8 @@ def add_to_pokupka(shop_id, product_id, employee_id, amount, total):
     qu = "INSERT INTO pokupka (shop_id, product_id, employee_id, amount, total)" \
          " VALUES ('" + str(shop_id) + "', '" + str(product_id) + "', '" + str(employee_id) + "', '" + str(
         amount) + "', '" + str(total) + "');"
-    runfunc(qu)
+    #runfunc(qu)
+    cursor.execute("INSERT INTO pokupka (shop_id, product_id, employee_id, amount, total) VALUES ( %s, %s, %s, %s, %s", str(shop_id).rstrip(), str(product_id).rstrip(), str(employee_id).rstrip(), str(amount).rstrip(), str(total).rstrip())
 
 
 def addButtonFunc():
@@ -70,13 +71,14 @@ def addEmployeeFunc():
     print(streetname)
     # print(shopname)
 
-    print(name)
-    print(pos)
-    sqlqv = "INSERT INTO employee (market_id, name, position) VALUES ( ( SELECT id FROM market WHERE street='" + \
-            str(streetname) + "' AND house=" + num + " ), '" + str(name) + "', '" + str(pos) + "')"
+    print(str(name).rstrip())
+    print(str(pos).rstrip())
+    #sqlqv = "INSERT INTO employee (market_id, name, position) VALUES ( ( SELECT id FROM market WHERE street='" + \
+           # str(streetname) + "' AND house=" + num + " ), '" + str(name).rstrip() + "', '" + str(pos).rstrip() + "')"
+    cursor.execute("INSERT INTO employee (market_id, name, position) VALUES ( ( SELECT id FROM market WHERE street=%s AND house=%s ),%s, %s )", str(streetname).rstrip(), num, str(name).rstrip(), str(pos).rstrip())
 
-    print(sqlqv)
-    runfunc(sqlqv)
+    #print(sqlqv)
+    #runfunc(sqlqv)
     return
 
 
@@ -130,7 +132,8 @@ def addCustomerButton():
     sq = "insert into customer (name, phone_number) Values ('" + name.rstrip()\
          + "', " + str(number).rstrip() + ")"
     print(sq)
-    runfunc(sq)
+    cursor.execute("insert into customer (name, phone_number) values ( %s, %s)", name.rstrip(), str(number).rstrip())
+    #runfunc(sq)
     return
 
 def delCustomerButton():
@@ -143,13 +146,23 @@ def delCustomerButton():
 def showCutomerButton():
     sq = "select * from customer"
     s = cursor.execute(sq)
-    print(list(s))
-    s = cursor.execute(sq)
-    [tableCustomer.delete(i) for i in tableCustomer.get_children()]
-    print(str(s))
-    [tableCustomer.insert('', 'end', values=row) for row in s.fetchall()]
+    r = s.fetchall()
 
-    print(s.fetchall())
+    print(type(r[0][0]))
+    print(r)
+    print(r[0][0])
+    print(list(s))
+
+    s = cursor.execute(sq)
+
+    [tableCustomer.delete(i) for i in tableCustomer.get_children()]
+    for i in range(len(r)):
+        tableCustomer.insert('', 'end', values=r[i])
+
+
+    #[tableCustomer.insert('', 'end', values=row) for row in r]
+
+   # print(s.fetchall())
     return
 
 
@@ -207,7 +220,8 @@ label_t2_1.grid(column=0, row=0)
 
 # выбор магазина
 combo_shop = Combobox(tab2)
-combo_shop['values'] = ("Октябрьская 11", "Львовская 7", "Ошарская 80", "Коминтерна 123")
+combo_shop['values'] = ("Дьяконова 15", "Ватутина 34", "Красных Партизан 2", "Ильинская 7", "Максима Горького 154",
+                        "Алексеевская 30", "Снежная 3", "Октябрьская 11", "Львовская 7", "Ошарская 80", "Коминтерна 123")
 combo_shop.grid(column=1, row=0)
 
 # ввод имени сотрудника
@@ -236,8 +250,8 @@ employeebutton.grid(column=4, row=0)
 # canvas.grid(column=3, row=2)
 
 # добавление таблицы
-tableemp = ttk.Treeview(tab2)
-tableemp['columns'] = ('id', 'market_id', 'name', 'position')
+tableemp = ttk.Treeview(tab2, columns=('id', 'market_id', 'name', 'position'), show='headings')
+#tableemp['columns'] = ('id', 'market_id', 'name', 'position')
 tableemp.column("#0", width=0, stretch=NO)
 tableemp.column('id', anchor=CENTER, width=90)
 tableemp.column('market_id', anchor=CENTER, width=90)
