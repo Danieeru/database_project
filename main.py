@@ -124,6 +124,35 @@ def delProductButton():
     runfunc(sq)
 
 
+def addCustomerButton():
+    name = customerText.get(1.0, END)
+    number = phoneNumberText.get(1.0, END)
+    sq = "insert into customer (name, phone_number) Values ('" + name.rstrip()\
+         + "', " + str(number).rstrip() + ")"
+    print(sq)
+    runfunc(sq)
+    return
+
+def delCustomerButton():
+    name = customerText.get(1.0, END)
+    sq = "delete from customer where name like '%%" + name.rstrip() + "%%'"
+    print(sq)
+    runfunc(sq)
+    return
+
+def showCutomerButton():
+    sq = "select * from customer"
+    s = cursor.execute(sq)
+    print(list(s))
+    s = cursor.execute(sq)
+    [tableCustomer.delete(i) for i in tableCustomer.get_children()]
+    print(str(s))
+    [tableCustomer.insert('', 'end', values=row) for row in s.fetchall()]
+
+    print(s.fetchall())
+    return
+
+
 window = Tk()
 window.title("database experience")
 window.geometry("800x600")
@@ -134,11 +163,13 @@ tab1 = ttk.Frame(appTabs)
 tab2 = ttk.Frame(appTabs)
 tab3 = ttk.Frame(appTabs)
 tab4 = ttk.Frame(appTabs)
+tab5 = ttk.Frame(appTabs)
 
 appTabs.add(tab1, text="Окно1")
 appTabs.add(tab2, text="Сотрудники")
 appTabs.add(tab3, text="ввод")
 appTabs.add(tab4, text='Товар')
+appTabs.add(tab5, text='Покупатели')
 ##создание тексового поля
 ##Значение WORD опции wrap позволяет переносить слова на новую строку целиком, а не по буквам.
 
@@ -220,6 +251,7 @@ tableemp.heading('position', text='Position', anchor=CENTER)
 #tableemp.grid(column=3, row=2)
 tableemp.place(relx=0, rely=0.5)
 
+
 showbutton = Button(tab2, text="Показать сотрудников")
 showbutton['command'] = showemployee
 showbutton.grid(column=4, row=1)
@@ -245,7 +277,7 @@ b1.pack(anchor=NW)
 ##result = cursor.execute(query)
 ##print(list(result))
 
-#tab4
+#tab4 ДОБАВЛЕНИЕ ТОВАРА
 
 label_t4_1 = Label(tab4, text="Название товара")
 label_t4_1.grid(column=0, row=0)
@@ -302,6 +334,43 @@ prodTable.heading('name', text="name", anchor=CENTER)
 prodTable.heading('price', text="price", anchor=CENTER)
 prodTable.heading('discount', text="discount", anchor=CENTER)
 prodTable.place(relx=0, rely=0.5)
+
+#tab5 Покупатели
+
+label_t5_1 = Label(tab5, text="Введите ФИО покупателя")
+label_t5_1.grid(column=0, row=0)
+customerText = Text(tab5, width=30, height=1)
+customerText.grid(column=0, row=1)
+
+label_t5_2 = Label(tab5, text="Введите номер")
+label_t5_2.grid(column=1, row=0)
+phoneNumberText = Text(tab5, width=20, height=1)
+phoneNumberText.grid(column=1, row=1)
+
+buttonAddCustomer = Button(tab5, text="Добавить")
+buttonAddCustomer['command'] = addCustomerButton
+buttonAddCustomer.grid(column=2, row=0)
+
+buttonDelCustomer = Button(tab5, text="Удалить")
+buttonDelCustomer['command'] = delCustomerButton
+buttonDelCustomer.grid(column=2, row=1)
+
+buttonShowCustomer = Button(tab5, text="Показать")
+buttonShowCustomer['command'] = showCutomerButton
+buttonShowCustomer.grid(column=2, row=2)
+
+tableCustomer = ttk.Treeview(tab5)
+tableCustomer['columns'] = ('id', 'name', 'phone number')
+tableCustomer.column('#0', width=0, stretch=NO)
+tableCustomer.column('id', anchor=CENTER, width=90)
+tableCustomer.column('name', anchor=CENTER, width=150)
+tableCustomer.column('phone number', anchor=CENTER, width=90)
+tableCustomer.heading('#0', text="", anchor=CENTER)
+tableCustomer.heading('id', text="id", anchor=CENTER)
+tableCustomer.heading('name', text="name", anchor=CENTER)
+tableCustomer.heading('phone number', text="phone number", anchor=CENTER)
+tableCustomer.place(relx=0, rely=0.2)
+
 
 appTabs.pack(expand=1, fill='both')
 window.mainloop()
