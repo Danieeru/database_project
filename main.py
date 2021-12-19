@@ -21,6 +21,13 @@ from PIL import Image, ImageTk
 
 ## отправляет запрос на бд и выполняет его
 ## это функция кнопки
+
+
+bdhost='localhost'
+bduser='postgres'
+bdpassword=1909
+bd='Market'
+
 def change():
     s = txtexample.get(1.0, END)
     print(s)
@@ -30,7 +37,7 @@ def change():
 
 ## функция которая отправляет запрос к БД
 def runfunc(str):
-    connection = psycopg2.connect(host="localhost", user="postgres", password=1909, database="Market")
+    connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
     try:
         cursor.execute(str)
@@ -44,12 +51,12 @@ def runfunc(str):
 
 
 # функция которая может вызываться внутри кода, но не из gui (пока)
-def add_to_pokupka(shop_id, product_id, employee_id, amount, total):
-    qu = "INSERT INTO pokupka (shop_id, product_id, employee_id, amount, total)" \
-         " VALUES ('" + str(shop_id) + "', '" + str(product_id) + "', '" + str(employee_id) + "', '" + str(
-        amount) + "', '" + str(total) + "');"
-    #runfunc(qu)
-    cursor.execute("INSERT INTO pokupka (shop_id, product_id, employee_id, amount, total) VALUES ( %s, %s, %s, %s, %s", str(shop_id).rstrip(), str(product_id).rstrip(), str(employee_id).rstrip(), str(amount).rstrip(), str(total).rstrip())
+#def add_to_pokupka(shop_id, product_id, employee_id, amount, total):
+ #   qu = "INSERT INTO pokupka (shop_id, product_id, employee_id, amount, total)" \
+ #        " VALUES ('" + str(shop_id) + "', '" + str(product_id) + "', '" + str(employee_id) + "', '" + str(
+ #       amount) + "', '" + str(total) + "');"
+ #   #runfunc(qu)
+ #   cursor.execute("INSERT INTO pokupka (shop_id, product_id, employee_id, amount, total) VALUES ( %s, %s, %s, %s, %s", str(shop_id).rstrip(), str(product_id).rstrip(), str(employee_id).rstrip(), str(amount).rstrip(), str(total).rstrip())
 
 
 def addButtonFunc():
@@ -64,7 +71,7 @@ def addButtonFunc():
 
 
 def addEmployeeFunc():
-    connection = psycopg2.connect(host="localhost", user="postgres", password=1909, database="Market")
+    connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
 
     name = textname.get(1.0, END)
@@ -85,7 +92,7 @@ def addEmployeeFunc():
 
 
 def showemployee():
-    connection = psycopg2.connect(host="localhost", user="postgres", password=1909, database="Market")
+    connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
     sq = "select * from employee"
     cursor.execute("select * from employee")
@@ -99,7 +106,7 @@ def showemployee():
 
 
 def delEmployeeBuuton():
-    connection = psycopg2.connect(host="localhost", user="postgres", password=1909, database="Market")
+    connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
     name = textname.get(1.0, END)
     name.rstrip()
@@ -113,7 +120,7 @@ def delEmployeeBuuton():
 
 
 def delbymarketid():
-    connection = psycopg2.connect(host="localhost", user="postgres", password=1909, database="Market")
+    connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
     marketname = combo_shop.get()
     namelist = marketname.split(' ')
@@ -133,7 +140,7 @@ def delbymarketid():
 
 
 def addProductButton():
-    connection = psycopg2.connect(host="localhost", user="postgres", password=1909, database="Market")
+    connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
 
     productname = prodname.get(1.0, END)
@@ -157,7 +164,7 @@ def addProductButton():
 
 
 def delProductButton():
-    connection = psycopg2.connect(host="localhost", user="postgres", password=1909, database="Market")
+    connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
     name = prodname.get(1.0, END)
     sq = "delete from product where name like '%%" + name.rstrip() + "%%'"
@@ -169,7 +176,7 @@ def delProductButton():
 
 
 def showProductButton():
-    connection = psycopg2.connect(host="localhost", user="postgres", password=1909, database="Market")
+    connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM product")
     [prodTable.delete(i) for i in prodTable.get_children()]
@@ -181,7 +188,7 @@ def showProductButton():
 
 
 def addCustomerButton():
-    connection = psycopg2.connect(host="localhost", user="postgres", password=1909, database="Market")
+    connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
 
     name = customerText.get(1.0, END)
@@ -196,7 +203,7 @@ def addCustomerButton():
     return
 
 def delCustomerButton():
-    connection = psycopg2.connect(host="localhost", user="postgres", password=1909, database="Market")
+    connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
 
     name = customerText.get(1.0, END)
@@ -210,7 +217,7 @@ def delCustomerButton():
     return
 
 def showCutomerButton():
-    connection = psycopg2.connect(host="localhost", user="postgres", password=1909, database="Market")
+    connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
 
     sq = "select * from customer"
