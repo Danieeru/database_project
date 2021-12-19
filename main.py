@@ -54,6 +54,7 @@ def addButtonFunc():
         CheckText.insert("end", (str(amount.get())))
         CheckText.insert("end", "\n")
         CheckText['state'] = tk.DISABLED
+       # combo_product['values'] += ("ыыыы",)
 
 
 def addEmployeeFunc():
@@ -105,6 +106,22 @@ def delEmployeeBuuton():
     print(sq)
     runfunc(sq)
 
+
+def delbymarketid():
+    marketname = combo_shop.get()
+    namelist = marketname.split(' ')
+    name = namelist[:-1:]
+    nam1=""
+    for i in range(len(name)):
+        nam1 += name[i]
+        nam1.rstrip()
+        if i != len(name) - 1: nam1 += " "
+
+    house = namelist[-1]
+    cursor.execute("delete from employee where market_id in (select id from market where street=%s AND house=%s)", nam1, house)
+    return
+
+
 def addProductButton():
     productname = prodname.get(1.0, END)
     typename = typecombo.get()
@@ -116,6 +133,7 @@ def addProductButton():
     print('manuf', manufacturer)
     print('price', price)
     print('dics', discount)
+    cursor.execute("insert into product ()")
     #ДОПИСАТЬ!
 
 
@@ -243,6 +261,8 @@ employeebutton = Button(tab2, text="Добавить сотрудника")
 employeebutton['command'] = addEmployeeFunc
 employeebutton.grid(column=4, row=0)
 
+
+
 # canvas = Canvas(tab2, height=400, width=700)
 # image = Image.open("C:\pics\empl.jpg")
 # photo = ImageTk.PhotoImage(image)
@@ -274,6 +294,10 @@ delbutton = Button(tab2, text="Удалить сотрудника")
 delbutton['command'] = delEmployeeBuuton
 delbutton.grid(column=4, row=2)
 
+buttonbelbymarketid = Button(tab2, text="Удалить всех из магазина")
+buttonbelbymarketid['command'] = delbymarketid
+buttonbelbymarketid.grid(column=4, row=3)
+
 
 
 # tab3
@@ -303,6 +327,7 @@ label_t4_2.grid(column=1, row=0)
 typecombo = Combobox(tab4, width=30)
 typecombo['values'] = ('Пиво', 'Вино', 'Виски', 'Коньяк', 'Шампанское', 'Ликер', 'Водка', 'Слабоалкогольный напиток')
 typecombo.grid(column=1, row=1)
+
 
 label_t4_3 = Label(tab4, text="Выберете производителя")
 label_t4_3.grid(column=2, row=0)
