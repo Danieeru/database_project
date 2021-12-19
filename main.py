@@ -9,14 +9,14 @@ from tkinter.ttk import Combobox
 from PIL import Image, ImageTk
 
 # Устанавливаем соединение с postgres
-connection = psycopg2.connect(user="postgres", password="1909")
-connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+#connection = psycopg2.connect(user="postgres", password="1909")
+#connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
 # Создаем курсор для выполнения операций с базой данных
-cursor = connection.cursor()
+#cursor = connection.cursor()
 ##engine = create_engine('postgresql://{}:{}@localhost/demo'.format(auth['postgres'], auth['1909']), echo=True)
 ##engine = create_engine('postgresql://postgres:1909@localhost/Market')
-engine = create_engine('postgresql://Arseny:bd@localhost/Market')
-cursor = engine.connect()
+#engine = create_engine('postgresql://Arseny:bd@localhost/Market')
+#cursor = engine.connect()
 
 
 ## отправляет запрос на бд и выполняет его
@@ -30,11 +30,17 @@ def change():
 
 ## функция которая отправляет запрос к БД
 def runfunc(str):
+    connection = psycopg2.connect(host="localhost", user="postgres", password=1909, database="Market")
+    cursor = connection.cursor()
     try:
         cursor.execute(str)
+        cursor.close()
+        connection.close()
     except Exception as ex:
         mb.showerror('Ошибка запроса', 'Ошибка в запросе к БД!\n Попробуйте изменить запрос.')
         print(ex)
+        cursor.close()
+        connection.close()
 
 
 # функция которая может вызываться внутри кода, но не из gui (пока)
@@ -58,6 +64,9 @@ def addButtonFunc():
 
 
 def addEmployeeFunc():
+    connection = psycopg2.connect(host="localhost", user="postgres", password=1909, database="Market")
+    cursor = connection.cursor()
+
     name = textname.get(1.0, END)
     pos = positionname.get(1.0, END)
     shopname = combo_shop.get()
@@ -67,47 +76,45 @@ def addEmployeeFunc():
             spacepos = i
     streetname = shopname[:spacepos]
     num = shopname[spacepos + 1::]
-    # print (spacepos)
-    print(num)
-    print(streetname)
-    # print(shopname)
-
-    print(str(name).rstrip())
-    print(str(pos).rstrip())
-    #sqlqv = "INSERT INTO employee (market_id, name, position) VALUES ( ( SELECT id FROM market WHERE street='" + \
-           # str(streetname) + "' AND house=" + num + " ), '" + str(name).rstrip() + "', '" + str(pos).rstrip() + "')"
-    cursor.execute("INSERT INTO employee (market_id, name, position) VALUES ( ( SELECT id FROM market WHERE street=%s AND house=%s ),%s, %s )", str(streetname).rstrip(), num, str(name).rstrip(), str(pos).rstrip())
-
-    #print(sqlqv)
-    #runfunc(sqlqv)
+    cursor.execute("INSERT INTO employee (market_id, name, position) VALUES ( ( SELECT id FROM market WHERE street=%s AND house=%s ),%s, %s )", (str(streetname).rstrip(), num, str(name).rstrip(), str(pos).rstrip()))
+    print('сотрудник добавлен - ' + name)
+    connection.commit()
+    cursor.close()
+    connection.close()
     return
 
 
 def showemployee():
+    connection = psycopg2.connect(host="localhost", user="postgres", password=1909, database="Market")
+    cursor = connection.cursor()
     sq = "select * from employee"
-    s = cursor.execute(sq)
-
-    # print(list(s))
+    cursor.execute("select * from employee")
 
     [tableemp.delete(i) for i in tableemp.get_children()]
+    [tableemp.insert('', 'end', values=row) for row in cursor.fetchall()]
 
-    [tableemp.insert('', 'end', values=row) for row in list(s)]
-    s = cursor.execute(sq)
-    print(s.fetchall())
-    # print(str(s[0][2]))
+    cursor.close()
+    connection.close()
     return
 
 
 def delEmployeeBuuton():
+    connection = psycopg2.connect(host="localhost", user="postgres", password=1909, database="Market")
+    cursor = connection.cursor()
     name = textname.get(1.0, END)
     name.rstrip()
     # очень важно писать %%
-    sq = "delete from employee where name like '%%" + name.rstrip() + "%%'"
-    print(sq)
-    runfunc(sq)
+    s = "delete from employee where name like '" + str(name).rstrip() + "'"
+    print(s)
+    cursor.execute(s)
+    connection.commit()
+    cursor.close()
+    connection.close()
 
 
 def delbymarketid():
+    connection = psycopg2.connect(host="localhost", user="postgres", password=1909, database="Market")
+    cursor = connection.cursor()
     marketname = combo_shop.get()
     namelist = marketname.split(' ')
     name = namelist[:-1:]
@@ -118,11 +125,17 @@ def delbymarketid():
         if i != len(name) - 1: nam1 += " "
 
     house = namelist[-1]
-    cursor.execute("delete from employee where market_id in (select id from market where street=%s AND house=%s)", nam1, house)
+    cursor.execute("delete from employee where market_id in (select id from market where street=%s AND house=%s)", (nam1, house))
+    connection.commit()
+    cursor.close()
+    connection.close()
     return
 
 
 def addProductButton():
+    connection = psycopg2.connect(host="localhost", user="postgres", password=1909, database="Market")
+    cursor = connection.cursor()
+
     productname = prodname.get(1.0, END)
     typename = typecombo.get()
     manufacturer = manufCombo.get()
@@ -133,54 +146,80 @@ def addProductButton():
     print('manuf', manufacturer)
     print('price', price)
     print('dics', discount)
-    cursor.execute("insert into product ()")
+    sq = "select product_insert('" + str(productname).rstrip() + "', " + str(price).rstrip() + ", '" + str(typename).rstrip() + "', '" + str(manufacturer).rstrip() + "')"
+    print(sq)
+    cursor.execute(sq)
+
+   # cursor.execute("select product_insert(%s, %s, %s, %s)", str(productname).rstrip(), float(price), str(typename).rstrip(), str(manufacturer).rstrip())
     #ДОПИСАТЬ!
+    cursor.close()
+    connection.close()
 
 
 def delProductButton():
+    connection = psycopg2.connect(host="localhost", user="postgres", password=1909, database="Market")
+    cursor = connection.cursor()
     name = prodname.get(1.0, END)
     sq = "delete from product where name like '%%" + name.rstrip() + "%%'"
     print(sq)
-    runfunc(sq)
+    cursor.execute(sq)
+    cursor.close()
+    connection.close()
+
+
+
+def showProductButton():
+    connection = psycopg2.connect(host="localhost", user="postgres", password=1909, database="Market")
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM product")
+    [prodTable.delete(i) for i in prodTable.get_children()]
+    [prodTable.insert('', 'end', values=row) for row in cursor.fetchall()]
+    cursor.close()
+    connection.close()
+
+    return
 
 
 def addCustomerButton():
+    connection = psycopg2.connect(host="localhost", user="postgres", password=1909, database="Market")
+    cursor = connection.cursor()
+
     name = customerText.get(1.0, END)
     number = phoneNumberText.get(1.0, END)
     sq = "insert into customer (name, phone_number) Values ('" + name.rstrip()\
          + "', " + str(number).rstrip() + ")"
     print(sq)
-    cursor.execute("insert into customer (name, phone_number) values ( %s, %s)", name.rstrip(), str(number).rstrip())
-    #runfunc(sq)
+    cursor.execute("insert into customer (name, phone_number) values ( %s, %s)", (name.rstrip(), str(number).rstrip()))
+    connection.commit()
+    cursor.close()
+    connection.close()
     return
 
 def delCustomerButton():
+    connection = psycopg2.connect(host="localhost", user="postgres", password=1909, database="Market")
+    cursor = connection.cursor()
+
     name = customerText.get(1.0, END)
-    sq = "delete from customer where name like '%%" + name.rstrip() + "%%'"
+    sq = "delete from customer where name like '" + name.rstrip() + "'"
     print(sq)
-    runfunc(sq)
+    cursor.execute(sq)
+    connection.commit()
+
+    cursor.close()
+    connection.close()
     return
 
 def showCutomerButton():
+    connection = psycopg2.connect(host="localhost", user="postgres", password=1909, database="Market")
+    cursor = connection.cursor()
+
     sq = "select * from customer"
-    s = cursor.execute(sq)
-    r = s.fetchall()
-
-    print(type(r[0][0]))
-    print(r)
-    print(r[0][0])
-    print(list(s))
-
-    s = cursor.execute(sq)
-
+    cursor.execute(sq)
     [tableCustomer.delete(i) for i in tableCustomer.get_children()]
-    for i in range(len(r)):
-        tableCustomer.insert('', 'end', values=r[i])
 
-
-    #[tableCustomer.insert('', 'end', values=row) for row in r]
-
-   # print(s.fetchall())
+    [tableCustomer.insert('', 'end', values=row) for row in cursor.fetchall()]
+    cursor.close()
+    connection.close()
     return
 
 
@@ -355,24 +394,32 @@ buttonDelProduct = Button(tab4, text="Удалить товар")
 buttonDelProduct['command'] = delProductButton
 buttonDelProduct.grid(column=5, row=1)
 
+buttonShowProduct = Button(tab4, text="Показать товар")
+buttonShowProduct['command'] = showProductButton
+buttonShowProduct.grid(column=5, row=2)
 
-prodTable = ttk.Treeview(tab4)
-prodTable['columns'] = ('id', 'type_id', 'manufacturer_id', 'name', 'price', 'discount')
-prodTable.column('#0', width=0, stretch=NO)
-prodTable.column('id', anchor=CENTER, width=90)
-prodTable.column('type_id', anchor=CENTER, width=90)
-prodTable.column('manufacturer_id', anchor=CENTER, width=90)
-prodTable.column('name', anchor=CENTER, width=90)
-prodTable.column('price', anchor=CENTER, width=90)
-prodTable.column('discount', anchor=CENTER, width=90)
-prodTable.heading('#0', text="", anchor=CENTER)
+
+prodTable = ttk.Treeview(tab4, columns=('id', 'type_id', 'manufacturer_id', 'name', 'price', 'discount'), height=10, show='headings')
+#prodTable['columns'] = ('id', 'type_id', 'manufacturer_id', 'name', 'price', 'discount')
+#prodTable.column('#0', width=0, stretch=NO)
+
+#prodTable.heading('#0', text="", anchor=CENTER)
 prodTable.heading('id', text="id", anchor=CENTER)
 prodTable.heading('type_id', text="type_id", anchor=CENTER)
 prodTable.heading('manufacturer_id', text="manufacturer_id", anchor=CENTER)
 prodTable.heading('name', text="name", anchor=CENTER)
 prodTable.heading('price', text="price", anchor=CENTER)
 prodTable.heading('discount', text="discount", anchor=CENTER)
-prodTable.place(relx=0, rely=0.5)
+
+prodTable.column('id', anchor=CENTER, width=90)
+prodTable.column('type_id', anchor=CENTER, width=90)
+prodTable.column('manufacturer_id', anchor=CENTER, width=90)
+prodTable.column('name', anchor=CENTER, width=90)
+prodTable.column('price', anchor=CENTER, width=90)
+prodTable.column('discount', anchor=CENTER, width=90)
+
+prodTable.grid(column=0, row=3, sticky='N', columnspan=10, pady=15 )
+#prodTable.place(relx=0, rely=0.5)
 
 #tab5 Покупатели
 
