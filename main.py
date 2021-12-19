@@ -156,9 +156,7 @@ def addProductButton():
     sq = "select product_insert('" + str(productname).rstrip() + "', " + str(price).rstrip() + ", '" + str(typename).rstrip() + "', '" + str(manufacturer).rstrip() + "')"
     print(sq)
     cursor.execute(sq)
-
-   # cursor.execute("select product_insert(%s, %s, %s, %s)", str(productname).rstrip(), float(price), str(typename).rstrip(), str(manufacturer).rstrip())
-    #ДОПИСАТЬ!
+    connection.commit()
     cursor.close()
     connection.close()
 
@@ -406,7 +404,7 @@ buttonShowProduct['command'] = showProductButton
 buttonShowProduct.grid(column=5, row=2)
 
 
-prodTable = ttk.Treeview(tab4, columns=('id', 'type_id', 'manufacturer_id', 'name', 'price', 'discount'), height=10, show='headings')
+prodTable = ttk.Treeview(tab4, columns=('id', 'type_id', 'manufacturer_id', 'name', 'price'), height=10, show='headings')
 #prodTable['columns'] = ('id', 'type_id', 'manufacturer_id', 'name', 'price', 'discount')
 #prodTable.column('#0', width=0, stretch=NO)
 
@@ -416,14 +414,14 @@ prodTable.heading('type_id', text="type_id", anchor=CENTER)
 prodTable.heading('manufacturer_id', text="manufacturer_id", anchor=CENTER)
 prodTable.heading('name', text="name", anchor=CENTER)
 prodTable.heading('price', text="price", anchor=CENTER)
-prodTable.heading('discount', text="discount", anchor=CENTER)
+
 
 prodTable.column('id', anchor=CENTER, width=90)
 prodTable.column('type_id', anchor=CENTER, width=90)
 prodTable.column('manufacturer_id', anchor=CENTER, width=90)
 prodTable.column('name', anchor=CENTER, width=90)
 prodTable.column('price', anchor=CENTER, width=90)
-prodTable.column('discount', anchor=CENTER, width=90)
+
 
 prodTable.grid(column=0, row=3, sticky='N', columnspan=10, pady=15 )
 #prodTable.place(relx=0, rely=0.5)
