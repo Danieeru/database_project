@@ -165,9 +165,10 @@ def delProductButton():
     connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
     name = prodname.get(1.0, END)
-    sq = "delete from product where name like '%%" + name.rstrip() + "%%'"
+    sq = "delete from product where name like '" + name.rstrip() + "'"
     print(sq)
     cursor.execute(sq)
+    connection.commit()
     cursor.close()
     connection.close()
 
