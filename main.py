@@ -24,8 +24,8 @@ from PIL import Image, ImageTk
 
 
 bdhost='localhost'
-bduser='postgres'
-bdpassword=1909
+bduser='Arseny'
+bdpassword='bd'
 bd='Market'
 
 def change():
@@ -61,12 +61,18 @@ def runfunc(str):
 
 def addButtonFunc():
     if (combo_product.get() != ""):
+        purchace_id = 0
+        name = combo_product.get()
+        am = amount.get()
+
         CheckText['state'] = NORMAL
         CheckText.insert("end", str(combo_product.get()))
         CheckText.insert("end", " ")
         CheckText.insert("end", (str(amount.get())))
         CheckText.insert("end", "\n")
         CheckText['state'] = tk.DISABLED
+        sq = "select rec_pos_insert(" + str(purchace_id) + ", '" + name + "', " + str(am) + ")"
+        print(sq)
        # combo_product['values'] += ("ыыыы",)
 
 
@@ -157,6 +163,7 @@ def addProductButton():
     print(sq)
     cursor.execute(sq)
     connection.commit()
+    combo_product['values'] += (productname,)
     cursor.close()
     connection.close()
 
@@ -167,8 +174,15 @@ def delProductButton():
     name = prodname.get(1.0, END)
     sq = "delete from product where name like '" + name.rstrip() + "'"
     print(sq)
+    print(combo_product['values'])
+    for i in range(len(combo_product['values'])):
+        if (combo_product['values'][i] == name.rstrip()):
+            combo_product['values'] -= combo_product['values'][i]
+        #print(combo_product['values'][i])
+       # if combo_product[i] == name.rstrip():
     cursor.execute(sq)
     connection.commit()
+    
     cursor.close()
     connection.close()
 
@@ -253,10 +267,15 @@ appTabs.add(tab5, text='Покупатели')
 label1 = Label(tab1, text="выберете продукт")
 label1.grid(column=0, row=0)
 
-combo_product = Combobox(tab1)
-combo_product['values'] = ("Bud", "Балтика 7", "Балтика 9", "Amstel", "Corona", "Heineken", "Carlsberg",
-                           "Lowenbreau", "Miller", "Толстяк", "Kozel", "Старый мельник", "Клинское", "Жигулевское",
-                           "387", "Spaten", "Asahi", "Paulaner")
+combo_product = Combobox(tab1, width=40)
+combo_product['values'] = ("Kronebourg 1664 Blanc", "Балтика №4 Оригинальное", "Балтика №0 Безалкогольное", "Балтика №6 Портер",
+                           "Горьковское", "Балтика №7 Экспортное", "Zatecky Gus Svetly", "Балтика №8 Пшеничное", "Carlsberg",
+                           "Балтика №9 Крепкое", "387. Особая варка", "Amsterdam Navigator", "Золотая Бочка Классическое",
+                           "Efes Pilsener", "Velkopopovicky Kozel Тёмное", "Miller", "Белый Медведь Светлое", "Bavaria Premium Pilsner",
+                           "Жигулевское Бочковое")
+                           #"Amstel", "Corona", "Heineken", "Carlsberg",
+                           #"Lowenbreau", "Miller", "Толстяк", "Kozel", "Старый мельник", "Клинское", "Жигулевское",
+                           #"387", "Spaten", "Asahi", "Paulaner")
 combo_product.grid(column=1, row=0)
 
 label2 = Label(tab1, text="Выберете количество")
@@ -328,7 +347,8 @@ tableemp.heading('market_id', text='market_id', anchor=CENTER)
 tableemp.heading('name', text='Name', anchor=CENTER)
 tableemp.heading('position', text='Position', anchor=CENTER)
 #tableemp.grid(column=3, row=2)
-tableemp.place(relx=0, rely=0.5)
+#tableemp.place(relx=0, rely=0.5)
+tableemp.grid(column=0, row=2, sticky='N', columnspan=10, pady=15 )
 
 
 showbutton = Button(tab2, text="Показать сотрудников")
@@ -337,11 +357,11 @@ showbutton.grid(column=4, row=1)
 
 delbutton = Button(tab2, text="Удалить сотрудника")
 delbutton['command'] = delEmployeeBuuton
-delbutton.grid(column=4, row=2)
+delbutton.grid(column=5, row=0)
 
 buttonbelbymarketid = Button(tab2, text="Удалить всех из магазина")
 buttonbelbymarketid['command'] = delbymarketid
-buttonbelbymarketid.grid(column=4, row=3)
+buttonbelbymarketid.grid(column=5, row=1)
 
 
 
@@ -419,8 +439,8 @@ prodTable.heading('price', text="price", anchor=CENTER)
 
 prodTable.column('id', anchor=CENTER, width=90)
 prodTable.column('type_id', anchor=CENTER, width=90)
-prodTable.column('manufacturer_id', anchor=CENTER, width=90)
-prodTable.column('name', anchor=CENTER, width=90)
+prodTable.column('manufacturer_id', anchor=CENTER, width=120)
+prodTable.column('name', anchor=CENTER, width=180)
 prodTable.column('price', anchor=CENTER, width=90)
 
 
