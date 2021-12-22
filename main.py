@@ -50,30 +50,54 @@ def runfunc(str):
         connection.close()
 
 
-# функция которая может вызываться внутри кода, но не из gui (пока)
-#def add_to_pokupka(shop_id, product_id, employee_id, amount, total):
- #   qu = "INSERT INTO pokupka (shop_id, product_id, employee_id, amount, total)" \
- #        " VALUES ('" + str(shop_id) + "', '" + str(product_id) + "', '" + str(employee_id) + "', '" + str(
- #       amount) + "', '" + str(total) + "');"
- #   #runfunc(qu)
- #   cursor.execute("INSERT INTO pokupka (shop_id, product_id, employee_id, amount, total) VALUES ( %s, %s, %s, %s, %s", str(shop_id).rstrip(), str(product_id).rstrip(), str(employee_id).rstrip(), str(amount).rstrip(), str(total).rstrip())
+
+def createPurchaseFunc():
+    connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
+    cursor = connection.cursor()
+    empName = empNameEntry.get()
+    custName = custNameEntry.get()
+    print (empName, custName)
+    sq = "select purchase_insert('" + empName.rstrip() + "', '" + custName.rstrip() + "')"
+    print(sq)
+    cursor.execute(sq)
+    connection.commit()
+    cursor.close()
+    connection.close()
+    return
+
 
 
 def addButtonFunc():
-    if (combo_product.get() != ""):
-        purchace_id = 0
-        name = combo_product.get()
-        am = amount.get()
+    connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
+    cursor = connection.cursor()
 
-        CheckText['state'] = NORMAL
-        CheckText.insert("end", str(combo_product.get()))
-        CheckText.insert("end", " ")
-        CheckText.insert("end", (str(amount.get())))
-        CheckText.insert("end", "\n")
-        CheckText['state'] = tk.DISABLED
-        sq = "select rec_pos_insert(" + str(purchace_id) + ", '" + name + "', " + str(am) + ")"
-        print(sq)
+    # insert into purchase(market_id, employee_id, customer_id, amount, purchase_date)
+    # values
+    # (2, 6, 7, 0, '21.12.2021 14:56:10')
+    # создание покупки
+
+
+
+    purchace_id = 0
+    #name = combo_product.get()
+    name = text_product.get()
+    am = amount.get()
+
+    CheckText['state'] = NORMAL
+    #CheckText.insert("end", " ")
+    #CheckText.insert("end", str(combo_product.get()))
+    CheckText.insert("end", name.rstrip())
+    CheckText.insert("end", " ")
+    CheckText.insert("end", (str(amount.get())))
+    CheckText.insert("end", "\n")
+    CheckText['state'] = tk.DISABLED
+    sq = "select rec_pos_insert(" + str(purchace_id) + ", '" + name + "', " + str(am) + ")"
+    connection.commit()
+    print(sq)
        # combo_product['values'] += ("ыыыы",)
+
+    cursor.close()
+    connection.close()
 
 
 def addEmployeeFunc():
@@ -163,7 +187,7 @@ def addProductButton():
     print(sq)
     cursor.execute(sq)
     connection.commit()
-    combo_product['values'] += (productname,)
+    #combo_product['values'] += (productname,)
     cursor.close()
     connection.close()
 
@@ -174,10 +198,10 @@ def delProductButton():
     name = prodname.get(1.0, END)
     sq = "delete from product where name like '" + name.rstrip() + "'"
     print(sq)
-    print(combo_product['values'])
-    for i in range(len(combo_product['values'])):
-        if (combo_product['values'][i] == name.rstrip()):
-            combo_product['values'] -= combo_product['values'][i]
+    #print(combo_product['values'])
+    #for i in range(len(combo_product['values'])):
+     #   if (combo_product['values'][i] == name.rstrip()):
+       #     combo_product['values'] -= combo_product['values'][i]
         #print(combo_product['values'][i])
        # if combo_product[i] == name.rstrip():
     cursor.execute(sq)
@@ -267,34 +291,60 @@ appTabs.add(tab5, text='Покупатели')
 label1 = Label(tab1, text="выберете продукт")
 label1.grid(column=0, row=0)
 
-combo_product = Combobox(tab1, width=40)
-combo_product['values'] = ("Kronebourg 1664 Blanc", "Балтика №4 Оригинальное", "Балтика №0 Безалкогольное", "Балтика №6 Портер",
-                           "Горьковское", "Балтика №7 Экспортное", "Zatecky Gus Svetly", "Балтика №8 Пшеничное", "Carlsberg",
-                           "Балтика №9 Крепкое", "387. Особая варка", "Amsterdam Navigator", "Золотая Бочка Классическое",
-                           "Efes Pilsener", "Velkopopovicky Kozel Тёмное", "Miller", "Белый Медведь Светлое", "Bavaria Premium Pilsner",
-                           "Жигулевское Бочковое")
+#combo_product = Combobox(tab1, width=40)
+#combo_product['values'] = ("Kronebourg 1664 Blanc", "Балтика №4 Оригинальное", "Балтика №0 Безалкогольное", "Балтика №6 Портер",
+                           #"Горьковское", "Балтика №7 Экспортное", "Zatecky Gus Svetly", "Балтика №8 Пшеничное", "Carlsberg",
+                           #"Балтика №9 Крепкое", "387. Особая варка", "Amsterdam Navigator", "Золотая Бочка Классическое",
+                           #"Efes Pilsener", "Velkopopovicky Kozel Тёмное", "Miller", "Белый Медведь Светлое", "Bavaria Premium Pilsner",
+                           #"Жигулевское Бочковое")
                            #"Amstel", "Corona", "Heineken", "Carlsberg",
                            #"Lowenbreau", "Miller", "Толстяк", "Kozel", "Старый мельник", "Клинское", "Жигулевское",
                            #"387", "Spaten", "Asahi", "Paulaner")
-combo_product.grid(column=1, row=0)
+#combo_product.grid(column=1, row=0)
+text_product = Entry(tab1, width=40)
+text_product.grid(column=0, row=1)
 
 label2 = Label(tab1, text="Выберете количество")
-label2.grid(column=2, row=0)
+label2.grid(column=1, row=0)
 
 amount = Spinbox(tab1, from_=1, to=100, width=5)
-amount.grid(column=3, row=0)
+amount.grid(column=1, row=1)
 
 label3 = Label(tab1, text="Выберете магазин")
-label3.grid(column=0, row=1)
+label3.grid(column=2, row=0)
+
+combo_shop_purchase = Combobox(tab1)
+combo_shop_purchase['values'] = ("Дьяконова 15", "Ватутина 34", "Красных Партизан 2", "Ильинская 7", "Максима Горького 154",
+                        "Алексеевская 30", "Снежная 3", "Октябрьская 11", "Львовская 7", "Ошарская 80", "Коминтерна 123")
+combo_shop_purchase.grid(column=2, row=1)
+
+label4 = Label(tab1, text="Введите имя продавца")
+label4.grid(column=3, row=0)
+empNameEntry = Entry(tab1, width=20)
+empNameEntry.grid(column=3, row=1)
+
+label5 = Label(tab1, text="Введите имя покупателя")
+label5.grid(column=0, row=2)
+custNameEntry = Entry(tab1, width=40)
+custNameEntry.grid(column=0, row=3)
+
+label6 = Label(tab1, text="Введите дату и время")
+label6.grid(column=1, row=2)
+dateEntry = Entry(tab1, width=20)
+dateEntry.grid(column=1, row=3)
+
+buttonCreatePurchase = Button(tab1, text="Создать покупку")
+buttonCreatePurchase['command'] = createPurchaseFunc
+buttonCreatePurchase.grid(column=5, row=0)
 
 n = 1.0
 # кнопка добавления товара
 buttonAddToCheck = Button(tab1, text="добавить")
 buttonAddToCheck['command'] = addButtonFunc
-buttonAddToCheck.grid(column=4, row=0)
+buttonAddToCheck.grid(column=5, row=1)
 
 CheckText = Text(tab1, width=30, height=10, wrap=WORD, state=tk.DISABLED)
-CheckText.grid(column=0, row=2)
+CheckText.grid(column=0, row=4)
 
 # tab2, добавление сотрудника
 label_t2_1 = Label(tab2, text="Выберете магазин")
@@ -399,7 +449,9 @@ label_t4_3.grid(column=2, row=0)
 manufCombo = Combobox(tab4)
 manufCombo['values'] = ('Балтика', 'Efes Russia', 'HEINEKEN Russia', 'Московская пивоваренная компания',
                         'SUN InBev Russia', 'Löwenbräu AG', 'Paulaner Brauerei GmbH & Co. KG', 'Bayreuther', 'Spaten',
-                        'BrewDog', 'Eichbaum')
+                        'BrewDog', 'Eichbaum', 'Vinos & Bodegas', 'Мысхако', 'Corporation Georgian Wine', 'Femar Vini',
+                        'Jack Daniels', 'Glenfarclas', 'Douglas Laing', 'Gordon and MacPhail', 'Кизлярский коньячный завод',
+                        'Tessendier', 'David Sarajishvili and Eniseli', 'Ragnaud-Sabourin')
 manufCombo.grid(column=2, row=1)
 
 label_t4_4 = Label(tab4, text="Ведите цену")
