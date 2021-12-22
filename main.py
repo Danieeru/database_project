@@ -9,26 +9,13 @@ from tkinter import ttk
 from tkinter.ttk import Combobox
 from PIL import Image, ImageTk
 
-# Устанавливаем соединение с postgres
-#connection = psycopg2.connect(user="postgres", password="1909")
-#connection.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-# Создаем курсор для выполнения операций с базой данных
-#cursor = connection.cursor()
-##engine = create_engine('postgresql://{}:{}@localhost/demo'.format(auth['postgres'], auth['1909']), echo=True)
-##engine = create_engine('postgresql://postgres:1909@localhost/Market')
-#engine = create_engine('postgresql://Arseny:bd@localhost/Market')
-#cursor = engine.connect()
+bdhost = 'localhost'
+bduser = 'Arseny'
+bdpassword = 'bd'
+bd = 'Market'
 
-
-## отправляет запрос на бд и выполняет его
-## это функция кнопки
-
-
-bdhost='localhost'
-bduser='Arseny'
-bdpassword='bd'
-bd='Market'
-
+#postgres
+#1909
 def change():
     s = txtexample.get(1.0, END)
     print(s)
@@ -331,6 +318,17 @@ def showScoreButton():
     return
 
 
+def changeUser():
+    username = logtext.get()
+    passw = passtext.get()
+    global bduser
+    global bdpassword
+    bduser = str(username).rstrip()
+    bdpassword = str(passw).rstrip()
+    print(username, passw)
+    return
+
+
 window = Tk()
 window.title("Бристоль")
 window.geometry("800x600")
@@ -374,13 +372,13 @@ custNameEntry.grid(column=0, row=3)
 
 buttonCreatePurchase = Button(tab1, text="Создать покупку")
 buttonCreatePurchase['command'] = createPurchaseFunc
-buttonCreatePurchase.grid(column=2, row=3)
+buttonCreatePurchase.grid(column=2, row=1)
 
 n = 1.0
 # кнопка добавления товара
 buttonAddToCheck = Button(tab1, text="добавить")
 buttonAddToCheck['command'] = addButtonFunc
-buttonAddToCheck.grid(column=2, row=1)
+buttonAddToCheck.grid(column=2, row=0)
 
 CheckText = Text(tab1, width=35, height=10, wrap=WORD, state=tk.DISABLED)
 CheckText.grid(column=0, row=4)
@@ -394,7 +392,7 @@ prodIdTable.grid(column=1, row=4)
 
 showProdIdButton = Button(tab1, text="Показать товары")
 showProdIdButton['command'] = showProdIdFunc
-showProdIdButton.grid(column=2, row=4)
+showProdIdButton.grid(column=2, row=2)
 
 # tab2, добавление сотрудника
 label_t2_1 = Label(tab2, text="Выберете магазин")
@@ -404,34 +402,26 @@ label_t2_1.grid(column=0, row=0)
 combo_shop = Combobox(tab2)
 combo_shop['values'] = ("Дьяконова 15", "Ватутина 34", "Красных Партизан 2", "Ильинская 7", "Максима Горького 154",
                         "Алексеевская 30", "Снежная 3", "Октябрьская 11", "Львовская 7", "Ошарская 80", "Коминтерна 123")
-combo_shop.grid(column=1, row=0)
+combo_shop.grid(column=0, row=1)
 
 # ввод имени сотрудника
 label_t2_2 = Label(tab2, text="Введите имя")
-label_t2_2.grid(column=2, row=0)
+label_t2_2.grid(column=1, row=0)
 
-textname = Text(tab2, width=15, height=1, wrap=WORD)
-textname.grid(column=3, row=0)
+textname = Text(tab2, width=30, height=1, wrap=WORD)
+textname.grid(column=1, row=1)
 
 # ввод должности
 label_t2_3 = Label(tab2, text="Введите должность")
-label_t2_3.grid(column=2, row=1)
+label_t2_3.grid(column=2, row=0)
 
 positionname = Text(tab2, width=15, height=1, wrap=WORD)
-positionname.grid(column=3, row=1)
+positionname.grid(column=2, row=1)
 
 # кнопка добавления сотрудника
 employeebutton = Button(tab2, text="Добавить сотрудника")
 employeebutton['command'] = addEmployeeFunc
 employeebutton.grid(column=4, row=0)
-
-
-
-# canvas = Canvas(tab2, height=400, width=700)
-# image = Image.open("C:\pics\empl.jpg")
-# photo = ImageTk.PhotoImage(image)
-# image = canvas.create_image(0, 0, anchor='nw',image=photo)
-# canvas.grid(column=3, row=2)
 
 # добавление таблицы
 tableemp = ttk.Treeview(tab2, columns=('id', 'market_id', 'name', 'position'), show='headings')
@@ -447,7 +437,7 @@ tableemp.heading('name', text='Name', anchor=CENTER)
 tableemp.heading('position', text='Position', anchor=CENTER)
 #tableemp.grid(column=3, row=2)
 #tableemp.place(relx=0, rely=0.5)
-tableemp.grid(column=0, row=2, sticky='N', columnspan=10, pady=15 )
+tableemp.grid(column=0, row=4, sticky='N', columnspan=10, pady=15 )
 
 
 showbutton = Button(tab2, text="Показать сотрудников")
@@ -471,7 +461,14 @@ txtexample.pack(anchor=NW)
 b1 = Button(tab3, text="отправить запрос", width=15, height=3, command=change)
 b1.pack(anchor=NW)
 
-
+labellog = Label(tab3, text="сменить пользователя\n Логин").pack(anchor=NW)
+logtext = Entry(tab3, width=30)
+logtext.pack(anchor=NW)
+labelpass = Label(tab3, text="пароль").pack(anchor=NW)
+passtext = Entry(tab3, width=30, show="*")
+passtext.pack(anchor=NW)
+changeUserButton = Button(tab3, text="Сменить пользователя", command=changeUser)
+changeUserButton.pack(anchor=NW)
 #tab4 ДОБАВЛЕНИЕ ТОВАРА
 
 label_t4_1 = Label(tab4, text="Название товара")
@@ -482,7 +479,7 @@ prodname.grid(column=0, row=1)
 label_t4_2 = Label(tab4, text="Выберете тип")
 label_t4_2.grid(column=1, row=0)
 typecombo = Combobox(tab4, width=30)
-typecombo['values'] = ('Пиво', 'Вино', 'Виски', 'Коньяк', 'Шампанское', 'Ликер', 'Водка', 'Ром')
+typecombo['values'] = ('Пиво', 'Вино', 'Виски', 'Коньяк', 'Шампанское', 'Ликёр', 'Водка', 'Ром')
 typecombo.grid(column=1, row=1)
 
 
@@ -587,6 +584,14 @@ tableScore.place(relx=0, rely=0.55)
 buttonShowScore = Button(tab5, text="Показать статистику")
 buttonShowScore['command'] = showScoreButton
 buttonShowScore.grid(column=3, row=1)
+
+canvas = Canvas(tab5, height=300, width=320)
+image = Image.open("C:\pics\pivo.jpg")
+photo = ImageTk.PhotoImage(image)
+image = canvas.create_image(0, 0, anchor='nw',image=photo)
+canvas.place(relx=0.6, rely=0.5)
+
+
 
 appTabs.pack(expand=1, fill='both')
 window.mainloop()
