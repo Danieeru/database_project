@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine
+import re
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import tkinter as tk
@@ -71,30 +72,30 @@ def addButtonFunc():
     connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
 
-    # insert into purchase(market_id, employee_id, customer_id, amount, purchase_date)
-    # values
-    # (2, 6, 7, 0, '21.12.2021 14:56:10')
-    # создание покупки
-
-
-
     purchace_id = 0
     #name = combo_product.get()
     name = text_product.get()
     am = amount.get()
+    cursor.execute("select max_id from (select market_id, max(id) as max_id from purchase group by market_id) as new_table")
+    s = str(cursor.fetchall())
+    print(s)
+
+    nums = re.findall('(\d+)', s)
+    print(nums[-1])
+    print(nums)
+    purchace_id = nums[-1]
+
 
     CheckText['state'] = NORMAL
-    #CheckText.insert("end", " ")
-    #CheckText.insert("end", str(combo_product.get()))
     CheckText.insert("end", name.rstrip())
     CheckText.insert("end", " ")
     CheckText.insert("end", (str(amount.get())))
     CheckText.insert("end", "\n")
     CheckText['state'] = tk.DISABLED
     sq = "select rec_pos_insert(" + str(purchace_id) + ", '" + name + "', " + str(am) + ")"
+    cursor.execute(sq)
     connection.commit()
     print(sq)
-       # combo_product['values'] += ("ыыыы",)
 
     cursor.close()
     connection.close()
@@ -328,10 +329,6 @@ label5.grid(column=0, row=2)
 custNameEntry = Entry(tab1, width=40)
 custNameEntry.grid(column=0, row=3)
 
-label6 = Label(tab1, text="Введите дату и время")
-label6.grid(column=1, row=2)
-dateEntry = Entry(tab1, width=20)
-dateEntry.grid(column=1, row=3)
 
 buttonCreatePurchase = Button(tab1, text="Создать покупку")
 buttonCreatePurchase['command'] = createPurchaseFunc
