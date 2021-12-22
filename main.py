@@ -199,36 +199,34 @@ def addProductButton():
     typename = typecombo.get()
     manufacturer = manufCombo.get()
     price = costText.get(1.0, END)
-    discount = discountText.get(1.0, END)
+
     print ('name', productname)
     print('type', typename)
     print('manuf', manufacturer)
     print('price', price)
-    print('dics', discount)
     sq = "select product_insert('" + str(productname).rstrip() + "', " + str(price).rstrip() + ", '" + str(typename).rstrip() + "', '" + str(manufacturer).rstrip() + "')"
     print(sq)
     cursor.execute(sq)
     connection.commit()
-    #combo_product['values'] += (productname,)
     cursor.close()
     connection.close()
 
 
-def delProductButton():
+def editProductButton():
     connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
+    prodid = productIdEntry.get()
     name = prodname.get(1.0, END)
-    sq = "delete from product where name like '" + name.rstrip() + "'"
+    typename = typecombo.get()
+    manufacturer = manufCombo.get()
+    price = costText.get(1.0, END)
+
+    # product_update(prod_id int, new_type_name text, new_company_name text, new_name text, new_price numeric)
+
+    sq = "select product_update(" + str(prodid).rstrip() + ", '" + str(typename).rstrip() + "', '" + str(manufacturer).rstrip() + "', '" + str(name).rstrip() + "', " + str(price).rstrip() + ")"
     print(sq)
-    #print(combo_product['values'])
-    #for i in range(len(combo_product['values'])):
-     #   if (combo_product['values'][i] == name.rstrip()):
-       #     combo_product['values'] -= combo_product['values'][i]
-        #print(combo_product['values'][i])
-       # if combo_product[i] == name.rstrip():
     cursor.execute(sq)
     connection.commit()
-    
     cursor.close()
     connection.close()
 
@@ -237,7 +235,7 @@ def delProductButton():
 def showProductButton():
     connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM product")
+    cursor.execute("SELECT * FROM product ORDER BY id")
     [prodTable.delete(i) for i in prodTable.get_children()]
     [prodTable.insert('', 'end', values=row) for row in cursor.fetchall()]
     cursor.close()
@@ -443,14 +441,8 @@ txtexample = Text(tab3, width=25, height=5, wrap=WORD)
 txtexample.pack(anchor=NW)
 
 b1 = Button(tab3, text="отправить запрос", width=15, height=3, command=change)
-# b1.grid(column=0, row=0)
 b1.pack(anchor=NW)
-#query = '''select * from aircrafts_data'''
 
-##cursor.execute(create_table_pokupka)
-# add_to_pokupka(1, 2, 4, 3, 150)
-##result = cursor.execute(query)
-##print(list(result))
 
 #tab4 ДОБАВЛЕНИЕ ТОВАРА
 
@@ -481,22 +473,18 @@ label_t4_4.grid(column=3, row=0)
 costText= Text(tab4, width=10, height=1)
 costText.grid(column=3, row=1)
 
-label_t4_5 = Label(tab4, text="Введите скидку")
-label_t4_5.grid(column=4, row=0)
-discountText = Text(tab4, width=10, height=1)
-discountText.grid(column=4, row=1)
 
 buttonAddProduct = Button(tab4, text="Добавить товар")
 buttonAddProduct['command'] = addProductButton
-buttonAddProduct.grid(column=5, row=0)
+buttonAddProduct.grid(column=4, row=0)
 
-buttonDelProduct = Button(tab4, text="Удалить товар")
-buttonDelProduct['command'] = delProductButton
-buttonDelProduct.grid(column=5, row=1)
+#buttonDelProduct = Button(tab4, text="Удалить товар")
+#buttonDelProduct['command'] = delProductButton
+#buttonDelProduct.grid(column=4, row=1)
 
 buttonShowProduct = Button(tab4, text="Показать товар")
 buttonShowProduct['command'] = showProductButton
-buttonShowProduct.grid(column=5, row=2)
+buttonShowProduct.grid(column=4, row=1)
 
 
 prodTable = ttk.Treeview(tab4, columns=('id', 'type_id', 'manufacturer_id', 'name', 'price'), height=10, show='headings')
@@ -520,6 +508,12 @@ prodTable.column('price', anchor=CENTER, width=90)
 
 prodTable.grid(column=0, row=3, sticky='N', columnspan=10, pady=15 )
 #prodTable.place(relx=0, rely=0.5)
+
+productIdEntry = Entry(tab4, width=10)
+productIdEntry.grid(column=0, row=4, sticky='W')
+editProductByIdButton = Button(tab4, text="Изменить по id")
+editProductByIdButton['command'] = editProductButton
+editProductByIdButton.grid(column=1, row=4, sticky='W')
 
 #tab5 Покупатели
 
