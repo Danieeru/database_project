@@ -76,23 +76,27 @@ def addButtonFunc():
     #name = combo_product.get()
     name = text_product.get()
     am = amount.get()
-    cursor.execute("select max_id from (select market_id, max(id) as max_id from purchase group by market_id) as new_table")
+    cursor.execute("select max(id) as max_id from purchase")
     s = str(cursor.fetchall())
-    print(s)
-
+    #print(s)
     nums = re.findall('(\d+)', s)
     print(nums[-1])
-    print(nums)
     purchace_id = nums[-1]
 
-
+    sqpos = "select name from product where id=" + name.rstrip()
+    cursor.execute(sqpos)
+    pos = str(cursor.fetchall())[3:-4]
+    print(sqpos)
+    print(str(pos))
     CheckText['state'] = NORMAL
-    CheckText.insert("end", name.rstrip())
+    CheckText.insert("end", str(pos))
     CheckText.insert("end", " ")
     CheckText.insert("end", (str(amount.get())))
     CheckText.insert("end", "\n")
     CheckText['state'] = tk.DISABLED
-    sq = "select rec_pos_insert(" + str(purchace_id) + ", '" + name + "', " + str(am) + ")"
+
+    sq = "select rec_pos_insert(" + str(purchace_id) + ", " + name + ", " + str(am) + ")"
+    print(sq)
     cursor.execute(sq)
     connection.commit()
     print(sq)
@@ -109,9 +113,9 @@ def showProdIdFunc():
     sq = ""
     if name:
         print(name.rstrip())
-        sq = "select id, name from product where name like '%%" + name.rstrip() + "%%'"
+        sq = "select id, name from product where name like '%%" + name.rstrip() + "%%' order by id"
     else:
-        sq = "select id, name from product"
+        sq = "select id, name from product order by id"
     print(sq)
     cursor.execute(sq)
     [prodIdTable.delete(i) for i in prodIdTable.get_children()]
@@ -286,6 +290,17 @@ def showCutomerButton():
     connection.close()
     return
 
+def showScoreButton():
+    connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
+    cursor = connection.cursor()
+    sq = "select customer.id, customer.name, sum(amount) as sum from purchase join customer on purchase.customer_id = customer.id group by customer.id order by sum desc"
+    cursor.execute(sq)
+    [tableScore.delete(i) for i in tableScore.get_children()]
+    [tableScore.insert('', 'end', values=row) for row in cursor.fetchall()]
+    cursor.close()
+    connection.close()
+    return
+
 
 window = Tk()
 window.title("database experience")
@@ -308,7 +323,7 @@ appTabs.add(tab5, text='Покупатели')
 ##Значение WORD опции wrap позволяет переносить слова на новую строку целиком, а не по буквам.
 
 
-label1 = Label(tab1, text="выберете продукт")
+label1 = Label(tab1, text="Введите id продукта")
 label1.grid(column=0, row=0)
 
 #combo_product = Combobox(tab1, width=40)
@@ -352,19 +367,19 @@ buttonAddToCheck = Button(tab1, text="добавить")
 buttonAddToCheck['command'] = addButtonFunc
 buttonAddToCheck.grid(column=2, row=1)
 
-CheckText = Text(tab1, width=30, height=10, wrap=WORD, state=tk.DISABLED)
+CheckText = Text(tab1, width=35, height=10, wrap=WORD, state=tk.DISABLED)
 CheckText.grid(column=0, row=4)
 
 prodIdTable = ttk.Treeview(tab1, columns=('id', 'name'), height=10, show='headings')
 prodIdTable.heading('id', text="id", anchor=CENTER)
 prodIdTable.heading('name', text="name", anchor=CENTER)
 prodIdTable.column('id', anchor=CENTER, width=70)
-prodIdTable.column('name', anchor=CENTER, width=180)
-prodIdTable.grid(column=1, row=5)
+prodIdTable.column('name', anchor=CENTER, width=250)
+prodIdTable.grid(column=1, row=4)
 
 showProdIdButton = Button(tab1, text="Показать товары")
 showProdIdButton['command'] = showProdIdFunc
-showProdIdButton.grid(column=2, row=5)
+showProdIdButton.grid(column=2, row=4)
 
 # tab2, добавление сотрудника
 label_t2_1 = Label(tab2, text="Выберете магазин")
@@ -407,9 +422,9 @@ employeebutton.grid(column=4, row=0)
 tableemp = ttk.Treeview(tab2, columns=('id', 'market_id', 'name', 'position'), show='headings')
 #tableemp['columns'] = ('id', 'market_id', 'name', 'position')
 tableemp.column("#0", width=0, stretch=NO)
-tableemp.column('id', anchor=CENTER, width=90)
-tableemp.column('market_id', anchor=CENTER, width=90)
-tableemp.column('name', anchor=CENTER, width=90)
+tableemp.column('id', anchor=CENTER, width=60)
+tableemp.column('market_id', anchor=CENTER, width=60)
+tableemp.column('name', anchor=CENTER, width=230)
 tableemp.column('position', anchor=CENTER, width=90)
 tableemp.heading('#0', text="", anchor=CENTER)
 tableemp.heading('id', text='ID', anchor=CENTER)
@@ -454,18 +469,22 @@ prodname.grid(column=0, row=1)
 label_t4_2 = Label(tab4, text="Выберете тип")
 label_t4_2.grid(column=1, row=0)
 typecombo = Combobox(tab4, width=30)
-typecombo['values'] = ('Пиво', 'Вино', 'Виски', 'Коньяк', 'Шампанское', 'Ликер', 'Водка', 'Слабоалкогольный напиток')
+typecombo['values'] = ('Пиво', 'Вино', 'Виски', 'Коньяк', 'Шампанское', 'Ликер', 'Водка', 'Ром')
 typecombo.grid(column=1, row=1)
 
 
 label_t4_3 = Label(tab4, text="Выберете производителя")
 label_t4_3.grid(column=2, row=0)
-manufCombo = Combobox(tab4)
+manufCombo = Combobox(tab4, width=30)
 manufCombo['values'] = ('Балтика', 'Efes Russia', 'HEINEKEN Russia', 'Московская пивоваренная компания',
                         'SUN InBev Russia', 'Löwenbräu AG', 'Paulaner Brauerei GmbH & Co. KG', 'Bayreuther', 'Spaten',
                         'BrewDog', 'Eichbaum', 'Vinos & Bodegas', 'Мысхако', 'Corporation Georgian Wine', 'Femar Vini',
                         'Jack Daniels', 'Glenfarclas', 'Douglas Laing', 'Gordon and MacPhail', 'Кизлярский коньячный завод',
-                        'Tessendier', 'David Sarajishvili and Eniseli', 'Ragnaud-Sabourin')
+                        'Tessendier', 'David Sarajishvili and Eniseli', 'Ragnaud-Sabourin', 'Louis Roederer',
+                        'Moet Chandon', 'Кубань-Вино', 'Cantine Quattro Valli', 'Bisol', 'Lucas Bols', 'Cooymans',
+                        'Handelshof NF & MS', 'Rossi D''Asiago Distillery', 'Renaud Cointreau', 'Absolut', 'Waldemar Behn',
+                        'Reyka', 'Синергия', 'Nolet Distillery', 'Destilerias Unidas (Dusa)', 'Rossi & Rossi',
+                        'Demerara Distillers', 'Oliver and Oliver', 'Cognac Ferrand')
 manufCombo.grid(column=2, row=1)
 
 label_t4_4 = Label(tab4, text="Ведите цену")
@@ -502,7 +521,7 @@ prodTable.heading('price', text="price", anchor=CENTER)
 prodTable.column('id', anchor=CENTER, width=90)
 prodTable.column('type_id', anchor=CENTER, width=90)
 prodTable.column('manufacturer_id', anchor=CENTER, width=120)
-prodTable.column('name', anchor=CENTER, width=180)
+prodTable.column('name', anchor=CENTER, width=230)
 prodTable.column('price', anchor=CENTER, width=90)
 
 
@@ -535,22 +554,34 @@ buttonDelCustomer = Button(tab5, text="Удалить")
 buttonDelCustomer['command'] = delCustomerButton
 buttonDelCustomer.grid(column=2, row=1)
 
-buttonShowCustomer = Button(tab5, text="Показать")
+buttonShowCustomer = Button(tab5, text="Показать покупателей")
 buttonShowCustomer['command'] = showCutomerButton
-buttonShowCustomer.grid(column=2, row=2)
+buttonShowCustomer.grid(column=3, row=0)
 
-tableCustomer = ttk.Treeview(tab5)
-tableCustomer['columns'] = ('id', 'name', 'phone number')
-tableCustomer.column('#0', width=0, stretch=NO)
+tableCustomer = ttk.Treeview(tab5, columns=('id', 'name', 'phone number'), height=10, show='headings')
+#tableCustomer['columns'] = ('id', 'name', 'phone number')
+#tableCustomer.column('#0', width=0, stretch=NO)
 tableCustomer.column('id', anchor=CENTER, width=90)
-tableCustomer.column('name', anchor=CENTER, width=150)
-tableCustomer.column('phone number', anchor=CENTER, width=90)
-tableCustomer.heading('#0', text="", anchor=CENTER)
+tableCustomer.column('name', anchor=CENTER, width=230)
+tableCustomer.column('phone number', anchor=CENTER, width=150)
+#tableCustomer.heading('#0', text="", anchor=CENTER)
 tableCustomer.heading('id', text="id", anchor=CENTER)
 tableCustomer.heading('name', text="name", anchor=CENTER)
 tableCustomer.heading('phone number', text="phone number", anchor=CENTER)
-tableCustomer.place(relx=0, rely=0.2)
+tableCustomer.place(relx=0, rely=0.15)
 
+tableScore = ttk.Treeview(tab5, columns=('id', 'name', 'sum'), height=10, show='headings')
+tableScore.heading('id', text="id", anchor=CENTER)
+tableScore.heading('name', text="name", anchor=CENTER)
+tableScore.heading('sum', text="sum", anchor=CENTER)
+tableScore.column('id', anchor=CENTER, width=60)
+tableScore.column('name', anchor=CENTER, width=230)
+tableScore.column('sum', anchor=CENTER, width=100)
+tableScore.place(relx=0, rely=0.55)
+
+buttonShowScore = Button(tab5, text="Показать статистику")
+buttonShowScore['command'] = showScoreButton
+buttonShowScore.grid(column=3, row=1)
 
 appTabs.pack(expand=1, fill='both')
 window.mainloop()
