@@ -101,6 +101,27 @@ def addButtonFunc():
     connection.close()
 
 
+
+def showProdIdFunc():
+    connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
+    cursor = connection.cursor()
+    name = text_product.get()
+    sq = ""
+    if name:
+        print(name.rstrip())
+        sq = "select id, name from product where name like '%%" + name.rstrip() + "%%'"
+    else:
+        sq = "select id, name from product"
+    print(sq)
+    cursor.execute(sq)
+    [prodIdTable.delete(i) for i in prodIdTable.get_children()]
+    [prodIdTable.insert('', 'end', values=row) for row in cursor.fetchall()]
+
+    cursor.close()
+    connection.close()
+    return
+
+
 def addEmployeeFunc():
     connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
@@ -311,18 +332,11 @@ label2.grid(column=1, row=0)
 amount = Spinbox(tab1, from_=1, to=100, width=5)
 amount.grid(column=1, row=1)
 
-label3 = Label(tab1, text="Выберете магазин")
-label3.grid(column=2, row=0)
-
-combo_shop_purchase = Combobox(tab1)
-combo_shop_purchase['values'] = ("Дьяконова 15", "Ватутина 34", "Красных Партизан 2", "Ильинская 7", "Максима Горького 154",
-                        "Алексеевская 30", "Снежная 3", "Октябрьская 11", "Львовская 7", "Ошарская 80", "Коминтерна 123")
-combo_shop_purchase.grid(column=2, row=1)
 
 label4 = Label(tab1, text="Введите имя продавца")
-label4.grid(column=3, row=0)
-empNameEntry = Entry(tab1, width=20)
-empNameEntry.grid(column=3, row=1)
+label4.grid(column=1, row=2)
+empNameEntry = Entry(tab1, width=40)
+empNameEntry.grid(column=1, row=3)
 
 label5 = Label(tab1, text="Введите имя покупателя")
 label5.grid(column=0, row=2)
@@ -332,16 +346,27 @@ custNameEntry.grid(column=0, row=3)
 
 buttonCreatePurchase = Button(tab1, text="Создать покупку")
 buttonCreatePurchase['command'] = createPurchaseFunc
-buttonCreatePurchase.grid(column=5, row=0)
+buttonCreatePurchase.grid(column=2, row=3)
 
 n = 1.0
 # кнопка добавления товара
 buttonAddToCheck = Button(tab1, text="добавить")
 buttonAddToCheck['command'] = addButtonFunc
-buttonAddToCheck.grid(column=5, row=1)
+buttonAddToCheck.grid(column=2, row=1)
 
 CheckText = Text(tab1, width=30, height=10, wrap=WORD, state=tk.DISABLED)
 CheckText.grid(column=0, row=4)
+
+prodIdTable = ttk.Treeview(tab1, columns=('id', 'name'), height=10, show='headings')
+prodIdTable.heading('id', text="id", anchor=CENTER)
+prodIdTable.heading('name', text="name", anchor=CENTER)
+prodIdTable.column('id', anchor=CENTER, width=70)
+prodIdTable.column('name', anchor=CENTER, width=180)
+prodIdTable.grid(column=1, row=5)
+
+showProdIdButton = Button(tab1, text="Показать товары")
+showProdIdButton['command'] = showProdIdFunc
+showProdIdButton.grid(column=2, row=5)
 
 # tab2, добавление сотрудника
 label_t2_1 = Label(tab2, text="Выберете магазин")
