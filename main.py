@@ -55,13 +55,14 @@ def runfunc(str):
 def createPurchaseFunc():
     connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
+
     empName = empNameEntry.get()
     custName = custNameEntry.get()
-    print (empName, custName)
     sq = "select purchase_insert('" + empName.rstrip() + "', '" + custName.rstrip() + "')"
     print(sq)
     cursor.execute(sq)
     connection.commit()
+
     cursor.close()
     connection.close()
     return
@@ -72,17 +73,14 @@ def addButtonFunc():
     connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
 
-    purchace_id = 0
-    #name = combo_product.get()
     name = text_product.get()
     am = amount.get()
+    print("select max(id) as max_id from purchase")
     cursor.execute("select max(id) as max_id from purchase")
     s = str(cursor.fetchall())
-    #print(s)
     nums = re.findall('(\d+)', s)
     print(nums[-1])
     purchace_id = nums[-1]
-
     sqpos = "select name from product where id=" + name.rstrip()
     cursor.execute(sqpos)
     pos = str(cursor.fetchall())[3:-4]
@@ -103,7 +101,7 @@ def addButtonFunc():
 
     cursor.close()
     connection.close()
-
+    return
 
 
 def showProdIdFunc():
@@ -139,9 +137,11 @@ def addEmployeeFunc():
             spacepos = i
     streetname = shopname[:spacepos]
     num = shopname[spacepos + 1::]
+    print("INSERT INTO employee (market_id, name, position) VALUES ( ( SELECT id FROM market WHERE street=" + str(streetname).rstrip() + " AND house=" + str(num).rstrip() + " )," + str(name).rstrip() + ", " + str(pos).rstrip() + " )")
     cursor.execute("INSERT INTO employee (market_id, name, position) VALUES ( ( SELECT id FROM market WHERE street=%s AND house=%s ),%s, %s )", (str(streetname).rstrip(), num, str(name).rstrip(), str(pos).rstrip()))
     print('сотрудник добавлен - ' + name)
     connection.commit()
+
     cursor.close()
     connection.close()
     return
@@ -151,6 +151,7 @@ def showemployee():
     connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
     sq = "select * from employee"
+    print(sq)
     cursor.execute("select * from employee")
 
     [tableemp.delete(i) for i in tableemp.get_children()]
@@ -164,13 +165,14 @@ def showemployee():
 def delEmployeeBuuton():
     connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
+
     name = textname.get(1.0, END)
     name.rstrip()
-    # очень важно писать %%
     s = "delete from employee where name like '" + str(name).rstrip() + "'"
     print(s)
     cursor.execute(s)
     connection.commit()
+
     cursor.close()
     connection.close()
 
@@ -178,6 +180,7 @@ def delEmployeeBuuton():
 def delbymarketid():
     connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
+
     marketname = combo_shop.get()
     namelist = marketname.split(' ')
     name = namelist[:-1:]
@@ -188,8 +191,10 @@ def delbymarketid():
         if i != len(name) - 1: nam1 += " "
 
     house = namelist[-1]
+    print("delete from employee where market_id in (select id from market where street=" + str(nam1).rstrip() + " AND house=" + str(house).rstrip() + ")")
     cursor.execute("delete from employee where market_id in (select id from market where street=%s AND house=%s)", (nam1, house))
     connection.commit()
+
     cursor.close()
     connection.close()
     return
@@ -212,6 +217,7 @@ def addProductButton():
     print(sq)
     cursor.execute(sq)
     connection.commit()
+
     cursor.close()
     connection.close()
 
@@ -219,6 +225,7 @@ def addProductButton():
 def editProductButton():
     connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
+
     prodid = productIdEntry.get()
     name = prodname.get(1.0, END)
     typename = typecombo.get()
@@ -231,6 +238,7 @@ def editProductButton():
     print(sq)
     cursor.execute(sq)
     connection.commit()
+
     cursor.close()
     connection.close()
 
@@ -239,12 +247,30 @@ def editProductButton():
 def showProductButton():
     connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
+
     cursor.execute("SELECT * FROM product ORDER BY id")
+    print("SELECT * FROM product ORDER BY id")
     [prodTable.delete(i) for i in prodTable.get_children()]
     [prodTable.insert('', 'end', values=row) for row in cursor.fetchall()]
+
     cursor.close()
     connection.close()
 
+    return
+
+def sortProductButton():
+    connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
+    cursor = connection.cursor()
+
+    prodtype = typecombo.get()
+    sq = "select * from product join product_type on product.type_id = product_type.id where product_type.type_name = '" + str(prodtype).rstrip() + "'"
+    print(sq)
+    cursor.execute(sq)
+    [prodTable.delete(i) for i in prodTable.get_children()]
+    [prodTable.insert('', 'end', values=row) for row in cursor.fetchall()]
+
+    cursor.close()
+    connection.close()
     return
 
 
@@ -259,6 +285,7 @@ def addCustomerButton():
     print(sq)
     cursor.execute("insert into customer (name, phone_number) values ( %s, %s)", (name.rstrip(), str(number).rstrip()))
     connection.commit()
+
     cursor.close()
     connection.close()
     return
@@ -282,6 +309,7 @@ def showCutomerButton():
     cursor = connection.cursor()
 
     sq = "select * from customer"
+    print(sq)
     cursor.execute(sq)
     [tableCustomer.delete(i) for i in tableCustomer.get_children()]
 
@@ -294,6 +322,7 @@ def showScoreButton():
     connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
     sq = "select customer.id, customer.name, sum(amount) as sum from purchase join customer on purchase.customer_id = customer.id group by customer.id order by sum desc"
+    print(sq)
     cursor.execute(sq)
     [tableScore.delete(i) for i in tableScore.get_children()]
     [tableScore.insert('', 'end', values=row) for row in cursor.fetchall()]
@@ -303,7 +332,7 @@ def showScoreButton():
 
 
 window = Tk()
-window.title("database experience")
+window.title("Бристоль")
 window.geometry("800x600")
 
 appTabs = ttk.Notebook(window)
@@ -314,37 +343,24 @@ tab3 = ttk.Frame(appTabs)
 tab4 = ttk.Frame(appTabs)
 tab5 = ttk.Frame(appTabs)
 
-appTabs.add(tab1, text="Окно1")
+appTabs.add(tab1, text="Покупка")
 appTabs.add(tab2, text="Сотрудники")
-appTabs.add(tab3, text="ввод")
+
 appTabs.add(tab4, text='Товар')
 appTabs.add(tab5, text='Покупатели')
-##создание тексового поля
-##Значение WORD опции wrap позволяет переносить слова на новую строку целиком, а не по буквам.
+appTabs.add(tab3, text="Ввод")
+
 
 
 label1 = Label(tab1, text="Введите id продукта")
 label1.grid(column=0, row=0)
-
-#combo_product = Combobox(tab1, width=40)
-#combo_product['values'] = ("Kronebourg 1664 Blanc", "Балтика №4 Оригинальное", "Балтика №0 Безалкогольное", "Балтика №6 Портер",
-                           #"Горьковское", "Балтика №7 Экспортное", "Zatecky Gus Svetly", "Балтика №8 Пшеничное", "Carlsberg",
-                           #"Балтика №9 Крепкое", "387. Особая варка", "Amsterdam Navigator", "Золотая Бочка Классическое",
-                           #"Efes Pilsener", "Velkopopovicky Kozel Тёмное", "Miller", "Белый Медведь Светлое", "Bavaria Premium Pilsner",
-                           #"Жигулевское Бочковое")
-                           #"Amstel", "Corona", "Heineken", "Carlsberg",
-                           #"Lowenbreau", "Miller", "Толстяк", "Kozel", "Старый мельник", "Клинское", "Жигулевское",
-                           #"387", "Spaten", "Asahi", "Paulaner")
-#combo_product.grid(column=1, row=0)
 text_product = Entry(tab1, width=40)
 text_product.grid(column=0, row=1)
 
 label2 = Label(tab1, text="Выберете количество")
 label2.grid(column=1, row=0)
-
 amount = Spinbox(tab1, from_=1, to=100, width=5)
 amount.grid(column=1, row=1)
-
 
 label4 = Label(tab1, text="Введите имя продавца")
 label4.grid(column=1, row=2)
@@ -355,7 +371,6 @@ label5 = Label(tab1, text="Введите имя покупателя")
 label5.grid(column=0, row=2)
 custNameEntry = Entry(tab1, width=40)
 custNameEntry.grid(column=0, row=3)
-
 
 buttonCreatePurchase = Button(tab1, text="Создать покупку")
 buttonCreatePurchase['command'] = createPurchaseFunc
@@ -420,7 +435,6 @@ employeebutton.grid(column=4, row=0)
 
 # добавление таблицы
 tableemp = ttk.Treeview(tab2, columns=('id', 'market_id', 'name', 'position'), show='headings')
-#tableemp['columns'] = ('id', 'market_id', 'name', 'position')
 tableemp.column("#0", width=0, stretch=NO)
 tableemp.column('id', anchor=CENTER, width=60)
 tableemp.column('market_id', anchor=CENTER, width=60)
@@ -451,8 +465,7 @@ buttonbelbymarketid.grid(column=5, row=1)
 
 
 # tab3
-txtexample = Text(tab3, width=25, height=5, wrap=WORD)
-# txtexample.grid(column=0, row=1)
+txtexample = Text(tab3, width=40, height=5, wrap=WORD)
 txtexample.pack(anchor=NW)
 
 b1 = Button(tab3, text="отправить запрос", width=15, height=3, command=change)
@@ -497,42 +510,37 @@ buttonAddProduct = Button(tab4, text="Добавить товар")
 buttonAddProduct['command'] = addProductButton
 buttonAddProduct.grid(column=4, row=0)
 
-#buttonDelProduct = Button(tab4, text="Удалить товар")
-#buttonDelProduct['command'] = delProductButton
-#buttonDelProduct.grid(column=4, row=1)
-
 buttonShowProduct = Button(tab4, text="Показать товар")
 buttonShowProduct['command'] = showProductButton
 buttonShowProduct.grid(column=4, row=1)
 
 
 prodTable = ttk.Treeview(tab4, columns=('id', 'type_id', 'manufacturer_id', 'name', 'price'), height=10, show='headings')
-#prodTable['columns'] = ('id', 'type_id', 'manufacturer_id', 'name', 'price', 'discount')
-#prodTable.column('#0', width=0, stretch=NO)
-
-#prodTable.heading('#0', text="", anchor=CENTER)
 prodTable.heading('id', text="id", anchor=CENTER)
 prodTable.heading('type_id', text="type_id", anchor=CENTER)
 prodTable.heading('manufacturer_id', text="manufacturer_id", anchor=CENTER)
 prodTable.heading('name', text="name", anchor=CENTER)
 prodTable.heading('price', text="price", anchor=CENTER)
-
-
 prodTable.column('id', anchor=CENTER, width=90)
 prodTable.column('type_id', anchor=CENTER, width=90)
 prodTable.column('manufacturer_id', anchor=CENTER, width=120)
 prodTable.column('name', anchor=CENTER, width=230)
 prodTable.column('price', anchor=CENTER, width=90)
 
-
 prodTable.grid(column=0, row=3, sticky='N', columnspan=10, pady=15 )
 #prodTable.place(relx=0, rely=0.5)
 
 productIdEntry = Entry(tab4, width=10)
 productIdEntry.grid(column=0, row=4, sticky='W')
+
 editProductByIdButton = Button(tab4, text="Изменить по id")
 editProductByIdButton['command'] = editProductButton
 editProductByIdButton.grid(column=1, row=4, sticky='W')
+
+buttonSortProduct = Button(tab4, text="Сортировать по типу")
+buttonSortProduct['command'] = sortProductButton
+buttonSortProduct.grid(column=4, row=2)
+
 
 #tab5 Покупатели
 
@@ -559,12 +567,9 @@ buttonShowCustomer['command'] = showCutomerButton
 buttonShowCustomer.grid(column=3, row=0)
 
 tableCustomer = ttk.Treeview(tab5, columns=('id', 'name', 'phone number'), height=10, show='headings')
-#tableCustomer['columns'] = ('id', 'name', 'phone number')
-#tableCustomer.column('#0', width=0, stretch=NO)
 tableCustomer.column('id', anchor=CENTER, width=90)
 tableCustomer.column('name', anchor=CENTER, width=230)
 tableCustomer.column('phone number', anchor=CENTER, width=150)
-#tableCustomer.heading('#0', text="", anchor=CENTER)
 tableCustomer.heading('id', text="id", anchor=CENTER)
 tableCustomer.heading('name', text="name", anchor=CENTER)
 tableCustomer.heading('phone number', text="phone number", anchor=CENTER)
