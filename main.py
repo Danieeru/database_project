@@ -1,12 +1,8 @@
-from sqlalchemy import create_engine
-import re
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
-import tkinter as tk
 from tkinter import *
 from tkinter import messagebox as mb
 from tkinter import ttk
-from tkinter.ttk import Combobox
 from PIL import Image, ImageTk
 
 bdhost = 'localhost'
@@ -21,7 +17,6 @@ def change():
     print(s)
     runfunc(s)
     print("button pressed")
-
 
 ## функция которая отправляет запрос к БД
 def runfunc(str):
@@ -95,7 +90,6 @@ def showProdIdFunc():
     connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
     name = text_product.get()
-    sq = ""
     if name:
         print(name.rstrip())
         sq = "select id, name from product where name like '%%" + name.rstrip() + "%%' order by id"
@@ -190,7 +184,6 @@ def delbymarketid():
 def addProductButton():
     connection = psycopg2.connect(host=bdhost, user=bduser, password=bdpassword, database=bd)
     cursor = connection.cursor()
-
     productname = prodname.get(1.0, END)
     typename = typecombo.get()
     manufacturer = manufCombo.get()
@@ -343,7 +336,6 @@ tab5 = ttk.Frame(appTabs)
 
 appTabs.add(tab1, text="Покупка")
 appTabs.add(tab2, text="Сотрудники")
-
 appTabs.add(tab4, text='Товар')
 appTabs.add(tab5, text='Покупатели')
 appTabs.add(tab3, text="Ввод")
